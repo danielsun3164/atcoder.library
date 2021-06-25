@@ -56,8 +56,9 @@ public class AtcoderMath {
 	}
 
 	/**
+	 * 中国剰余定理（Chinese remainder theorem）を解く<br/>
 	 * 同じ長さの配列 r, m に対して、この配列の長さをnとした時、<br/>
-	 * x≡r[i](modm[i]),∀i∈{0,1,⋯,n−1} <br/>
+	 * x≡r[i](mod m[i]),∀i∈{0,1,⋯,n−1} <br/>
 	 * を解きます。答えは(存在するならば) y,z(0≤y<z=lcm(m[i])) を用いて x≡y(mod z) の形で書けることが知られており、<br/>
 	 * この (y,z) を配列として返します。答えがない場合は (0,0) を返します。
 	 *
