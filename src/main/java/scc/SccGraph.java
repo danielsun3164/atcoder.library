@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 
 /**
  * https://github.com/atcoder/ac-library/blob/master/atcoder/scc.hpp<br/>
- * https://github.com/atcoder/ac-library/blob/master/atcoder/internal_scc.hpp をもちに作成
+ * https://github.com/atcoder/ac-library/blob/master/atcoder/internal_scc.hpp をもとに作成
  */
 public class SccGraph {
 	/** ノード数 */
