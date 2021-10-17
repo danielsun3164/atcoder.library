@@ -53,7 +53,7 @@ public class SccGraph {
 	int groupNum;
 
 	// @return pair of (# of scc, scc id)
-	LGraph sccIds() {
+	private LGraph sccIds() {
 		Csr g = new Csr(n, edges);
 		nowOrd = 0;
 		groupNum = 0;
@@ -124,7 +124,7 @@ public class SccGraph {
 	/**
 	 * グラフを表すクラス
 	 */
-	static class LGraph {
+	private static class LGraph {
 		int nodes;
 		int[] edges;
 
