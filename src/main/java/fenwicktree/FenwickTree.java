@@ -15,6 +15,13 @@ class FenwickTree {
 
 	/**
 	 * コンストラクター
+	 */
+	FenwickTree() {
+		this(0);
+	}
+
+	/**
+	 * コンストラクター
 	 *
 	 * @param n 項目数
 	 */

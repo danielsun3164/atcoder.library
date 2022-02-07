@@ -14,7 +14,9 @@ class FenwickTreeTest {
 
 	@Test
 	void empty() {
-		// 引数なしのコンストラクターを提供しないため、テスト対象外
+		FenwickTree fw = new FenwickTree();
+		assertEquals(0L, fw.sum(0, 0));
+		// 以降modintの実装がないため、テスト対象外
 	}
 
 	@Test
@@ -78,7 +80,7 @@ class FenwickTreeTest {
 	}
 
 	@Test
-	void Invalid() {
+	void invalid() {
 		assertThrows(IllegalArgumentException.class, () -> new FenwickTree(-1));
 		FenwickTree fw = new FenwickTree(10);
 		assertThrows(IllegalArgumentException.class, () -> fw.add(-1, 0));
