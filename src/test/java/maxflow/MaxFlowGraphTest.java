@@ -164,7 +164,7 @@ class MaxFlowGraphTest {
 			while (s == t) {
 				t = random.nextInt(n);
 			}
-			if (0 == random.nextInt(1)) {
+			if (random.nextBoolean()) {
 				int tmp = s;
 				s = t;
 				t = tmp;
