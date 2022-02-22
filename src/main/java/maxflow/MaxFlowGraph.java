@@ -43,7 +43,7 @@ public class MaxFlowGraph {
 	 * @param from
 	 * @param to
 	 * @param cap
-	 * @return
+	 * @return 追加する前の辺の数
 	 */
 	int addEdge(int from, int to, long cap) {
 		if (!((0 <= from) && (from < n))) {
@@ -190,7 +190,7 @@ public class MaxFlowGraph {
 	 * 最小カット問題を解く
 	 *
 	 * @param s
-	 * @return
+	 * @return 最小カット問題の回答
 	 */
 	boolean[] minCut(int s) {
 		if (!((0 <= s) && (s < n))) {

@@ -134,7 +134,7 @@ abstract class SegTree<S> {
 	 *
 	 * @param l
 	 * @param f
-	 * @return
+	 * @return 条件を両方満たす r を(いずれか一つ)
 	 */
 	int maxRight(int l, Predicate<S> f) {
 		if (!(0 <= l && l <= n)) {
@@ -176,7 +176,7 @@ abstract class SegTree<S> {
 	 *
 	 * @param r
 	 * @param f
-	 * @return
+	 * @return 条件を両方満たす l を(いずれか一つ)
 	 */
 	int minLeft(int r, Predicate<S> f) {
 		if (!(0 <= r && r <= n)) {

@@ -64,7 +64,7 @@ public class AtcoderMath {
 	 *
 	 * @param r
 	 * @param m
-	 * @return
+	 * @return 回答の配列
 	 */
 	static long[] crt(long[] r, long[] m) {
 		if (r.length != m.length) {

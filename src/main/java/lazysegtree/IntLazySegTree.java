@@ -209,7 +209,7 @@ public abstract class IntLazySegTree {
 	 *
 	 * @param l
 	 * @param g
-	 * @return
+	 * @return 条件を両方満たす r を(いずれか一つ)
 	 */
 	int maxRight(int l, Predicate<Integer> g) {
 		if (!(0 <= l && l <= n)) {
@@ -253,7 +253,7 @@ public abstract class IntLazySegTree {
 	 *
 	 * @param r
 	 * @param g
-	 * @return
+	 * @return 条件を両方満たす l を(いずれか一つ)
 	 */
 	int minLeft(int r, Predicate<Integer> g) {
 		if (!(0 <= r && r <= n)) {
