@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 /**
  * https://github.com/atcoder/ac-library/blob/master/atcoder/string.hpp を参考に作成
  */
-public class AtcoderStringUtils {
+public class AtcoderString {
 	static int[] saNaive(int[] s) {
 		int n = s.length;
 		return IntStream.range(0, n).boxed().sorted((l, r) -> {
