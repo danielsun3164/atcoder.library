@@ -1,4 +1,4 @@
-package maxflow;
+package flow;
 
 import java.util.ArrayList;
 import java.util.Arrays;

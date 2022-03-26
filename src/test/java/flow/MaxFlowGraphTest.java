@@ -1,4 +1,4 @@
-package maxflow;
+package flow;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import maxflow.MaxFlowGraph.Edge;
+import flow.MaxFlowGraph.Edge;
 
 /**
  * https://github.com/atcoder/ac-library/blob/master/test/unittest/maxflow_test.cpp をもとに作成
