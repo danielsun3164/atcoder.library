@@ -3,3 +3,4 @@
 ## [AtCoder Library for Java](https://github.com/NASU41/AtCoderLibraryForJava) にも参考
 
 ## 本家のUnitテストもJavaで実装
+## パフォーマンスの問題があるため、modintは未実装
