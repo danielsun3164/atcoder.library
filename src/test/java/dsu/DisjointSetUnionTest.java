@@ -9,6 +9,9 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * https://github.com/atcoder/ac-library/blob/master/test/unittest/dsu_test.cpp をもとに作成
+ */
 class DisjointSetUnionTest {
 
 	@Test

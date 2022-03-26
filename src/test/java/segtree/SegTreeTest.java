@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Test;
 
 /**
- * https://github.com/atcoder/ac-library/blob/master/test/unittest/segtree_test.cpp
+ * https://github.com/atcoder/ac-library/blob/master/test/unittest/segtree_test.cpp をもとに作成
  */
 class SegTreeTest {
 

@@ -8,7 +8,7 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
 /**
- * https://github.com/atcoder/ac-library/blob/master/test/unittest/fenwicktree_test.cpp のJava実装
+ * https://github.com/atcoder/ac-library/blob/master/test/unittest/fenwicktree_test.cpp をもとに作成
  */
 class FenwickTreeTest {
 
