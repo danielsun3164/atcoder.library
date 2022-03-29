@@ -489,9 +489,9 @@ class AtcoderMathTest {
 		assertEquals(0, AtcoderMath.bsf(7));
 		assertEquals(3, AtcoderMath.bsf(8));
 		assertEquals(0, AtcoderMath.bsf(9));
-		assertEquals(30, AtcoderMath.bsf(1L << 30));
-		assertEquals(0, AtcoderMath.bsf((1L << 31) - 1));
-		assertEquals(31, AtcoderMath.bsf(1L << 31));
+		assertEquals(30, AtcoderMath.bsf(1 << 30));
+		assertEquals(0, AtcoderMath.bsf((1 << 31) - 1));
+		assertEquals(31, AtcoderMath.bsf(1 << 31));
 		assertEquals(0, AtcoderMath.bsf(Integer.MAX_VALUE));
 	}
 }
