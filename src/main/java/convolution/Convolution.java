@@ -7,121 +7,142 @@ import java.util.Arrays;
  */
 public class Convolution {
 	static int MOD = -1;
-	private static int SIZE = 30;
-	private static boolean first = true;
-	// sum_e[i] = ies[0] * ... * ies[i - 1] * es[i]
-	private static long[] sum_e = new long[SIZE];
-	private static boolean invFirst = true;
-	// sum_ie[i] = es[0] * ... * es[i - 1] * ies[i]
-	private static long[] sum_ie = new long[SIZE];
 	private static int g;
+	private static FftInfo info;
 
 	private static void butterfly(long[] a) {
-		g = primitiveRoot(MOD);
 		int n = a.length, h = ceilPow2(n);
-
-		if (first) {
-			first = false;
-			Arrays.fill(sum_e, 0L);
-			// es[i]^(2^(2+i)) == 1
-			int cnt2 = bsf(MOD - 1);
-			long[] es = new long[SIZE], ies = new long[SIZE];
-			long e = powMod(g, (MOD - 1) >> cnt2), ie = invMod(e);
-			for (int i = cnt2; i >= 2; i--) {
-				// e^(2^i) == 1
-				es[i - 2] = e;
-				ies[i - 2] = ie;
-				e = safeMod(e * e);
-				ie = safeMod(ie * ie);
-			}
-			long now = 1L;
-			for (int i = 0; i <= (cnt2 - 2); i++) {
-				sum_e[i] = safeMod(es[i] * now);
-				now = safeMod(now * ies[i]);
-			}
-		}
-		for (int ph = 1; ph <= h; ph++) {
-			int w = 1 << (ph - 1), p = 1 << (h - ph);
-			long now = 1L;
-			for (int s = 0; s < w; s++) {
-				int offset = s << ((h - ph) + 1);
-				for (int i = 0; i < p; i++) {
-					long l = a[i + offset];
-					long r = safeMod(a[i + offset + p] * now);
-					a[i + offset] = safeMod(l + r);
-					a[i + offset + p] = safeMod(l - r);
+		// a[i, i+(n>>len), i+2*(n>>len), ..] is transformed
+		int len = 0;
+		while (len < h) {
+			if (h - len == 1) {
+				int p = 1 << (h - len - 1);
+				long rot = 1L;
+				for (int s = 0; s < (1 << len); s++) {
+					int offset = s << (h - len);
+					for (int i = 0; i < p; i++) {
+						long l = a[i + offset];
+						long r = safeMod(a[i + offset + p] * rot);
+						a[i + offset] = safeMod(l + r);
+						a[i + offset + p] = safeMod(l - r);
+					}
+					if ((s + 1) != (1 << len)) {
+						rot = safeMod(rot * info.rate2[bsf(~s & Integer.MAX_VALUE)]);
+					}
 				}
-				now = safeMod(now * (sum_e[bsf(~s & Integer.MAX_VALUE)]));
+				len++;
+			} else {
+				// 4-base
+				int p = 1 << (h - len - 2);
+				long rot = 1L, imag = info.root[2];
+				for (int s = 0; s < (1 << len); s++) {
+					long rot2 = safeMod(rot * rot);
+					long rot3 = safeMod(rot2 * rot);
+					int offset = s << (h - len);
+					for (int i = 0; i < p; i++) {
+						long a0 = a[i + offset];
+						long a1 = safeMod(a[i + offset + p] * rot);
+						long a2 = safeMod(a[i + offset + 2 * p] * rot2);
+						long a3 = safeMod(a[i + offset + 3 * p] * rot3);
+						long a1na3imag = safeMod((a1 - a3) * imag);
+						long na2 = safeMod(MOD - a2);
+						a[i + offset] = safeMod(a0 + a2 + a1 + a3);
+						a[i + offset + 1 * p] = safeMod(a0 + a2 - (a1 + a3));
+						a[i + offset + 2 * p] = safeMod(a0 + na2 + a1na3imag);
+						a[i + offset + 3 * p] = safeMod(a0 + na2 - a1na3imag);
+					}
+					if ((s + 1) != (1 << len)) {
+						rot = safeMod(rot * info.rate3[bsf(~s & Integer.MAX_VALUE)]);
+					}
+				}
+				len += 2;
 			}
 		}
 	}
 
 	private static void butterflyInv(long[] a) {
-		g = primitiveRoot(MOD);
 		int n = a.length, h = ceilPow2(n);
 
-		if (invFirst) {
-			invFirst = false;
-			Arrays.fill(sum_ie, 0L);
-			// es[i]^(2^(2+i)) == 1
-			int cnt2 = bsf(MOD - 1);
-			long[] es = new long[SIZE], ies = new long[SIZE];
-			long e = powMod(g, (MOD - 1) >> cnt2), ie = invMod(e);
-			for (int i = cnt2; i >= 2; i--) {
-				// e^(2^i) == 1
-				es[i - 2] = e;
-				ies[i - 2] = ie;
-				e = safeMod(e * e);
-				ie = safeMod(ie * ie);
-			}
-			long now = 1L;
-			for (int i = 0; i <= (cnt2 - 2); i++) {
-				sum_ie[i] = safeMod(ies[i] * now);
-				now = safeMod(now * es[i]);
-			}
-		}
-
-		for (int ph = h; ph >= 1; ph--) {
-			int w = 1 << (ph - 1), p = 1 << (h - ph);
-			long inow = 1L;
-			for (int s = 0; s < w; s++) {
-				int offset = s << ((h - ph) + 1);
-				for (int i = 0; i < p; i++) {
-					long l = a[i + offset];
-					long r = a[i + offset + p];
-					a[i + offset] = safeMod(l + r);
-					a[i + offset + p] = safeMod(safeMod(l - r) * inow);
+		int len = h; // a[i, i+(n>>len), i+2*(n>>len), ..] is transformed
+		while (len > 0) {
+			if (len == 1) {
+				int p = 1 << (h - len);
+				long irot = 1L;
+				for (int s = 0; s < (1 << (len - 1)); s++) {
+					int offset = s << (h - len + 1);
+					for (int i = 0; i < p; i++) {
+						long l = a[i + offset], r = a[i + offset + p];
+						a[i + offset] = safeMod(l + r);
+						a[i + offset + p] = safeMod((l - r) * irot);
+					}
+					if ((s + 1) != (1 << (len - 1))) {
+						irot = safeMod(irot * info.irate2[bsf(~s & Integer.MAX_VALUE)]);
+					}
 				}
-				inow = safeMod(inow * sum_ie[bsf(~s & Integer.MAX_VALUE)]);
+				len--;
+			} else {
+				// 4-base
+				int p = 1 << (h - len);
+				long irot = 1, iimag = info.iroot[2];
+				for (int s = 0; s < (1 << (len - 2)); s++) {
+					long irot2 = irot * irot % MOD;
+					long irot3 = irot2 * irot % MOD;
+					int offset = s << (h - len + 2);
+					for (int i = 0; i < p; i++) {
+						long a0 = a[i + offset];
+						long a1 = a[i + offset + 1 * p];
+						long a2 = a[i + offset + 2 * p];
+						long a3 = a[i + offset + 3 * p];
+
+						long a2na3iimag = safeMod((a2 - a3) * iimag);
+
+						a[i + offset] = safeMod(a0 + a1 + a2 + a3);
+						a[i + offset + 1 * p] = safeMod((a0 - a1 + a2na3iimag) * irot);
+						a[i + offset + 2 * p] = safeMod((a0 + a1 + -a2 - a3) * irot2);
+						a[i + offset + 3 * p] = safeMod((a0 - a1 - a2na3iimag) * irot3);
+					}
+					if ((s + 1) != (1 << (len - 2))) {
+						irot = safeMod(irot * info.irate3[bsf(~s & Integer.MAX_VALUE)]);
+					}
+				}
+				len -= 2;
 			}
 		}
 	}
 
-	private static long[] convolutionNaive(long[] a, long[] b) {
-		int n = a.length, m = b.length;
+	private static long[] convolutionNaive(long[] a, int aFromIndex, int aToIndex, long[] b, int bFromIndex,
+			int bToIndex) {
+		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
 		long[] ans = new long[(n + m) - 1];
 		if (n < m) {
 			for (int j = 0; j < m; j++) {
 				for (int i = 0; i < n; i++) {
-					ans[i + j] = safeMod(ans[i + j] + safeMod(a[i] * b[j]));
+					ans[i + j] = safeMod(ans[i + j] + a[i + aFromIndex] * b[j + bFromIndex]);
 				}
 			}
 		} else {
 			for (int i = 0; i < n; i++) {
 				for (int j = 0; j < m; j++) {
-					ans[i + j] = safeMod(ans[i + j] + safeMod(a[i] * b[j]));
+					ans[i + j] = safeMod(ans[i + j] + a[i + aFromIndex] * b[j + bFromIndex]);
 				}
 			}
 		}
 		return ans;
 	}
 
-	private static long[] convolutionFft(long[] a, long[] b) {
-		int n = a.length, m = b.length;
-		int z = 1 << ceilPow2((n + m) - 1);
-		a = Arrays.copyOf(a, z);
+	private static long[] convolutionFft(long[] a, int aFromIndex, int aToIndex, long[] b, int bFromIndex,
+			int bToIndex) {
+		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
+		int z = 1 << ceilPow2(n + m - 1);
+		{
+			long[] na = new long[z];
+			System.arraycopy(a, aFromIndex, na, 0, n);
+			long[] nb = new long[z];
+			System.arraycopy(b, bFromIndex, nb, 0, m);
+			a = na;
+			b = nb;
+		}
 		butterfly(a);
-		b = Arrays.copyOf(b, z);
 		butterfly(b);
 		for (int i = 0; i < z; i++) {
 			a[i] = safeMod(a[i] * b[i]);
@@ -135,15 +156,23 @@ public class Convolution {
 		return a;
 	}
 
-	private static long[] convolution(long[] a, long[] b) {
-		int n = a.length, m = b.length;
+	private static long[] convolution(long[] a, int aFromIndex, int aToIndex, long[] b, int bFromIndex, int bToIndex) {
+		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
 		if ((0 == n) || (0 == m)) {
 			return new long[0];
 		}
 		if (Math.min(n, m) <= 60) {
-			return convolutionNaive(a, b);
+			return convolutionNaive(a, aFromIndex, aToIndex, b, bFromIndex, bToIndex);
 		} else {
-			return convolutionFft(a, b);
+			return convolutionFft(a, aFromIndex, aToIndex, b, bFromIndex, bToIndex);
+		}
+	}
+
+	private static void init(int m) {
+		if (m != MOD) {
+			MOD = m;
+			g = primitiveRoot(MOD);
+			info = new FftInfo();
 		}
 	}
 
@@ -156,12 +185,42 @@ public class Convolution {
 	 * @return 計算した結果配列
 	 */
 	static long[] convolution(long[] a, long[] b, int m) {
-		if (MOD != m) {
-			MOD = m;
-			first = true;
-			invFirst = true;
+		return convolution(a, 0, a.length, b, 0, b.length, m);
+	}
+
+	/**
+	 * 畳み込みを mod m で計算します。a,b の少なくとも一方が空配列の場合は空配列を返します。
+	 *
+	 * @param a
+	 * @param aFromIndex
+	 * @param aToIndex
+	 * @param b
+	 * @param bFromIndex
+	 * @param bToIndex
+	 * @param m
+	 * @return 計算した結果配列
+	 */
+	static long[] convolution(long[] a, int aFromIndex, int aToIndex, long[] b, int bFromIndex, int bToIndex, int m) {
+		if (!(aFromIndex >= 0)) {
+			throw new IllegalArgumentException("aFromIndex is " + aFromIndex);
 		}
-		return convolution(a, b);
+		if (!(aFromIndex <= aToIndex)) {
+			throw new IllegalArgumentException("aFromIndex is " + aFromIndex + ", aToIndex is " + aToIndex);
+		}
+		if (!(aToIndex <= a.length)) {
+			throw new IllegalArgumentException("aToIndex is " + aToIndex);
+		}
+		if (!(bFromIndex >= 0)) {
+			throw new IllegalArgumentException("bFromIndex is " + bFromIndex);
+		}
+		if (!(bFromIndex <= bToIndex)) {
+			throw new IllegalArgumentException("bFromIndex is " + bFromIndex + ", bToIndex is " + bToIndex);
+		}
+		if (!(bToIndex <= b.length)) {
+			throw new IllegalArgumentException("bToIndex is " + bToIndex);
+		}
+		init(m);
+		return convolution(a, aFromIndex, aToIndex, b, bFromIndex, bToIndex);
 	}
 
 	private static final long MOD1 = 754_974_721L; // 2^24
@@ -184,7 +243,40 @@ public class Convolution {
 	 * @return 計算した結果配列
 	 */
 	static long[] convolutionLong(long[] a, long[] b) {
-		int n = a.length, m = b.length;
+		return convolutionLong(a, 0, a.length, b, 0, b.length);
+	}
+
+	/**
+	 * 畳み込みを計算します。a,b の少なくとも一方が空配列の場合は空配列を返します。
+	 *
+	 * @param a
+	 * @param aFromIndex
+	 * @param aToIndex
+	 * @param b
+	 * @param bFromIndex
+	 * @param bToIndex
+	 * @return 計算した結果配列
+	 */
+	static long[] convolutionLong(long[] a, int aFromIndex, int aToIndex, long[] b, int bFromIndex, int bToIndex) {
+		if (!(aFromIndex >= 0)) {
+			throw new IllegalArgumentException("aFromIndex is " + aFromIndex);
+		}
+		if (!(aFromIndex <= aToIndex)) {
+			throw new IllegalArgumentException("aFromIndex is " + aFromIndex + ", aToIndex is " + aToIndex);
+		}
+		if (!(aToIndex <= a.length)) {
+			throw new IllegalArgumentException("aToIndex is " + aToIndex);
+		}
+		if (!(bFromIndex >= 0)) {
+			throw new IllegalArgumentException("bFromIndex is " + bFromIndex);
+		}
+		if (!(bFromIndex <= bToIndex)) {
+			throw new IllegalArgumentException("bFromIndex is " + bFromIndex + ", bToIndex is " + bToIndex);
+		}
+		if (!(bToIndex <= b.length)) {
+			throw new IllegalArgumentException("bToIndex is " + bToIndex);
+		}
+		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
 		if ((0 == n) || (0 == m)) {
 			return new long[0];
 		}
@@ -395,14 +487,70 @@ public class Convolution {
 	 * @param n `1 <= n`
 	 * @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
 	 */
-	static int bsf(long n) {
+	static int bsf(int n) {
+		return Integer.numberOfTrailingZeros(n);
+	}
+
+	/**
+	 * @param n `1 <= n`
+	 * @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
+	 */
+	static int bsfConstexpr(long n) {
 		if (!(1L <= n)) {
 			throw new IllegalArgumentException("n is " + n);
 		}
 		int x = 0;
-		while ((0 == (n & (1L << x))) && (x < 31)) {
+		while (0 == (n & (1 << x))) {
 			x++;
 		}
 		return x;
+	}
+
+	private static class FftInfo {
+		final int rank2;
+		final long[] root;
+		final long[] iroot;
+		final long[] rate2;
+		final long[] irate2;
+		final long[] rate3;
+		final long[] irate3;
+
+		FftInfo() {
+			rank2 = bsfConstexpr(MOD - 1);
+			root = new long[rank2 + 1];
+			iroot = new long[rank2 + 1];
+			rate2 = new long[Math.max(0, rank2 - 2 + 1)];
+			irate2 = new long[Math.max(0, rank2 - 2 + 1)];
+			rate3 = new long[Math.max(0, rank2 - 3 + 1)];
+			irate3 = new long[Math.max(0, rank2 - 3 + 1)];
+			init();
+		}
+
+		void init() {
+			root[rank2] = powMod(g, (MOD - 1) >> rank2);
+			iroot[rank2] = invMod(root[rank2]);
+			for (int i = rank2 - 1; i >= 0; i--) {
+				root[i] = safeMod(root[i + 1] * root[i + 1]);
+				iroot[i] = safeMod(iroot[i + 1] * iroot[i + 1]);
+			}
+			{
+				long prod = 1L, iprod = 1L;
+				for (int i = 0; i <= rank2 - 2; i++) {
+					rate2[i] = safeMod(root[i + 2] * prod);
+					irate2[i] = safeMod(iroot[i + 2] * iprod);
+					prod = safeMod(prod * iroot[i + 2]);
+					iprod = safeMod(iprod * root[i + 2]);
+				}
+			}
+			{
+				long prod = 1L, iprod = 1L;
+				for (int i = 0; i <= rank2 - 3; i++) {
+					rate3[i] = safeMod(root[i + 3] * prod);
+					irate3[i] = safeMod(iroot[i + 3] * iprod);
+					prod = safeMod(prod * iroot[i + 3]);
+					iprod = safeMod(iprod * root[i + 3]);
+				}
+			}
+		}
 	}
 }
