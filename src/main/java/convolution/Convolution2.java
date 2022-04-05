@@ -145,7 +145,6 @@ public class Convolution2 {
 	 * @param m
 	 * @return 計算した結果配列
 	 */
-	@SuppressWarnings("unused")
 	static int[] convolution(int[] a, int[] b, int m) {
 		return convolution(a, 0, a.length, b, 0, b.length, m);
 	}
