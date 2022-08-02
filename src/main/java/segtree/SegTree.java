@@ -16,8 +16,6 @@ abstract class SegTree<S> {
 
 	/**
 	 * コンストラクター
-	 *
-	 * @param n
 	 */
 	SegTree() {
 		this(0);

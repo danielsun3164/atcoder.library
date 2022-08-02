@@ -319,14 +319,7 @@ public class AtcoderMath {
 	 * @param n `1 <= n`
 	 * @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
 	 */
-	static int bsf(long n) {
-		if (!(1L <= n)) {
-			throw new IllegalArgumentException("n is " + n);
-		}
-		int x = 0;
-		while ((0 == (n & (1L << x))) && (x < 31)) {
-			x++;
-		}
-		return x;
+	static int bsf(int n) {
+		return Long.numberOfTrailingZeros(n);
 	}
 }
