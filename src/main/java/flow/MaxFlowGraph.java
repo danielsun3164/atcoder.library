@@ -56,8 +56,8 @@ public class MaxFlowGraph {
 			throw new IllegalArgumentException("cap is " + cap);
 		}
 		int m = pos.size();
-		pos.add(new int[] { from, g[from].size() });
 		int fromId = g[from].size(), toId = g[to].size();
+		pos.add(new int[] { from, fromId });
 		if (from == to) {
 			toId++;
 		}
