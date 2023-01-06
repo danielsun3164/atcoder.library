@@ -120,12 +120,12 @@ public class Convolution2 {
 	}
 
 	private static int[] convolution(int[] a, int aFromIndex, int aToIndex, int[] b, int bFromIndex, int bToIndex) {
-		while ((aToIndex > aFromIndex) && (0 == a[aToIndex - 1])) {
-			aToIndex--;
-		}
-		while ((bToIndex > bFromIndex) && (0 == b[bToIndex - 1])) {
-			bToIndex--;
-		}
+//		while ((aToIndex > aFromIndex) && (0 == a[aToIndex - 1])) {
+//			aToIndex--;
+//		}
+//		while ((bToIndex > bFromIndex) && (0 == b[bToIndex - 1])) {
+//			bToIndex--;
+//		}
 		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
 		if ((0 == n) || (0 == m)) {
 			return new int[0];
