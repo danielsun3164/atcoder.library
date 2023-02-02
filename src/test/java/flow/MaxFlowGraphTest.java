@@ -153,9 +153,10 @@ class MaxFlowGraphTest {
 		assertThrows(IllegalArgumentException.class, () -> g.flow(0, 0, 0));
 	}
 
+	private static final Random random = new Random();
+
 	@Test
 	void stress() {
-		Random random = new Random();
 		for (int phase = 0; phase < 10000; phase++) {
 			int n = random.nextInt(19) + 2;
 			int m = random.nextInt(100) + 1;
