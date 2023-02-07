@@ -346,11 +346,34 @@ public class AtcoderString {
 	}
 
 	/**
+	 * @param s 配列
+	 * @return 長さnの配列。 i番目の要素は s[0..n)とs[i..n)のLCP(Longest Common Prefix)の長さ。
+	 */
+	static int[] zAlgorithm(char[] s) {
+		int n = s.length;
+		if (0 == n) {
+			return new int[] {};
+		}
+		int[] z = new int[n];
+		z[0] = 0;
+		for (int i = 1, j = 0; i < n; i++) {
+			z[i] = (j + z[j] <= i) ? 0 : Math.min(j + z[j] - i, z[i - j]);
+			while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+				z[i]++;
+			}
+			if (j + z[j] < i + z[i]) {
+				j = i;
+			}
+		}
+		z[0] = n;
+		return z;
+	}
+
+	/**
 	 * @param s 文字列
 	 * @return 長さnの配列。 i番目の要素は s[0..n)とs[i..n)のLCP(Longest Common Prefix)の長さ。
 	 */
 	static int[] zAlgorithm(String s) {
-		int[] s2 = IntStream.range(0, s.length()).map(i -> s.charAt(i)).toArray();
-		return zAlgorithm(s2);
+		return zAlgorithm(s.toCharArray());
 	}
 }
