@@ -8,6 +8,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>11</java.version>
     <junit.jupiter.version>5.9.2</junit.jupiter.version>
+    <spotbugs.exclude.filter.file>spotbugs-exclude.xml</spotbugs.exclude.filter.file>
   </properties>
   
   <dependencies>
@@ -50,6 +51,28 @@
       <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.22.2</version>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.7.3.0</version>
+        <configuration>
+          <excludeFilterFile>${spotbugs.exclude.filter.file}</excludeFilterFile>
+          <plugins>
+            <plugin>
+              <groupId>com.h3xstream.findsecbugs</groupId>
+              <artifactId>findsecbugs-plugin</artifactId>
+              <version>1.12.0</version>
+            </plugin>
+          </plugins>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs</artifactId>
+            <version>4.7.3</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
