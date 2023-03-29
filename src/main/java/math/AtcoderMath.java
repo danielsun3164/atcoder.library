@@ -315,11 +315,70 @@ public class AtcoderMath {
 	}
 
 	/**
+	 * n以上最小の2^xの数字を計算する
 	 *
-	 * @param n `1 <= n`
-	 * @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
+	 * @param n
+	 * @return n以上最小の2^xの数字
 	 */
-	static int bsf(int n) {
+	static int bitCeil(int n) {
+		if (!(0 <= n)) {
+			throw new IllegalArgumentException("n is " + n);
+		}
+		int x = 1;
+		while (x < n) {
+			x <<= 1;
+		}
+		return x;
+	}
+
+	/**
+	 * n以上最小の2^xの数字を計算する
+	 *
+	 * @param n
+	 * @return n以上最小の2^xの数字
+	 */
+	static long bitCeil(long n) {
+		if (!(0L <= n)) {
+			throw new IllegalArgumentException("n is " + n);
+		}
+		long x = 1L;
+		while (x < n) {
+			x <<= 1;
+		}
+		return x;
+	}
+
+	/**
+	 * 入力数値を2進で表した場合に、右から連続した0のビットを数える
+	 *
+	 * @param n 数値
+	 * @return 2進で表した場合に、右から連続した0のビット
+	 */
+	static int countrZero(int n) {
+		return Integer.numberOfTrailingZeros(n);
+	}
+
+	/**
+	 * 入力数値を2進で表した場合に、右から連続した0のビットを数える。を返す
+	 *
+	 * @param n 数値
+	 * @return 2進で表した場合に、右から連続した0のビット
+	 */
+	static int countrZero(long n) {
 		return Long.numberOfTrailingZeros(n);
+	}
+
+	/**
+	 * 入力数値を2進で表した場合に、右から連続した0のビットを数える。を返す
+	 *
+	 * @param n 数値
+	 * @return 2進で表した場合に、右から連続した0のビット
+	 */
+	static int countrZeroConstexpr(int n) {
+		int x = 0;
+		while (0 == (n & (1 << x))) {
+			x++;
+		}
+		return x;
 	}
 }

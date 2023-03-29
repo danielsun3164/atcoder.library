@@ -479,19 +479,54 @@ class AtcoderMathTest {
 	}
 
 	@Test
-	void bsf() {
-		assertEquals(0, AtcoderMath.bsf(1));
-		assertEquals(1, AtcoderMath.bsf(2));
-		assertEquals(0, AtcoderMath.bsf(3));
-		assertEquals(2, AtcoderMath.bsf(4));
-		assertEquals(0, AtcoderMath.bsf(5));
-		assertEquals(1, AtcoderMath.bsf(6));
-		assertEquals(0, AtcoderMath.bsf(7));
-		assertEquals(3, AtcoderMath.bsf(8));
-		assertEquals(0, AtcoderMath.bsf(9));
-		assertEquals(30, AtcoderMath.bsf(1 << 30));
-		assertEquals(0, AtcoderMath.bsf((1 << 31) - 1));
-		assertEquals(31, AtcoderMath.bsf(1 << 31));
-		assertEquals(0, AtcoderMath.bsf(Integer.MAX_VALUE));
+	void bitCeil() {
+		assertEquals(1, AtcoderMath.bitCeil(0));
+		assertEquals(1, AtcoderMath.bitCeil(1));
+		assertEquals(2, AtcoderMath.bitCeil(2));
+		assertEquals(4, AtcoderMath.bitCeil(3));
+		assertEquals(4, AtcoderMath.bitCeil(4));
+		assertEquals(8, AtcoderMath.bitCeil(5));
+		assertEquals(8, AtcoderMath.bitCeil(6));
+		assertEquals(8, AtcoderMath.bitCeil(7));
+		assertEquals(8, AtcoderMath.bitCeil(8));
+		assertEquals(16, AtcoderMath.bitCeil(9));
+		assertEquals(1 << 30, AtcoderMath.bitCeil(1 << 30));
+		assertEquals(1L << 31, AtcoderMath.bitCeil((1L << 30) + 1));
+		assertEquals(1L << 31, AtcoderMath.bitCeil((1L << 31) - 1));
+		assertEquals(1L << 31, AtcoderMath.bitCeil((long) Integer.MAX_VALUE));
+	}
+
+	@Test
+	void countrZero() {
+		assertEquals(0, AtcoderMath.countrZero(1));
+		assertEquals(1, AtcoderMath.countrZero(2));
+		assertEquals(0, AtcoderMath.countrZero(3));
+		assertEquals(2, AtcoderMath.countrZero(4));
+		assertEquals(0, AtcoderMath.countrZero(5));
+		assertEquals(1, AtcoderMath.countrZero(6));
+		assertEquals(0, AtcoderMath.countrZero(7));
+		assertEquals(3, AtcoderMath.countrZero(8));
+		assertEquals(0, AtcoderMath.countrZero(9));
+		assertEquals(30, AtcoderMath.countrZero(1 << 30));
+		assertEquals(0, AtcoderMath.countrZero((1 << 31) - 1));
+		assertEquals(31, AtcoderMath.countrZero(1 << 31));
+		assertEquals(0, AtcoderMath.countrZero(Integer.MAX_VALUE));
+	}
+
+	@Test
+	void countrZeroConstexpr() {
+		assertEquals(0, AtcoderMath.countrZeroConstexpr(1));
+		assertEquals(1, AtcoderMath.countrZeroConstexpr(2));
+		assertEquals(0, AtcoderMath.countrZeroConstexpr(3));
+		assertEquals(2, AtcoderMath.countrZeroConstexpr(4));
+		assertEquals(0, AtcoderMath.countrZeroConstexpr(5));
+		assertEquals(1, AtcoderMath.countrZeroConstexpr(6));
+		assertEquals(0, AtcoderMath.countrZeroConstexpr(7));
+		assertEquals(3, AtcoderMath.countrZeroConstexpr(8));
+		assertEquals(0, AtcoderMath.countrZeroConstexpr(9));
+		assertEquals(30, AtcoderMath.countrZeroConstexpr(1 << 30));
+		assertEquals(0, AtcoderMath.countrZeroConstexpr((1 << 31) - 1));
+		assertEquals(31, AtcoderMath.countrZeroConstexpr(1 << 31));
+		assertEquals(0, AtcoderMath.countrZeroConstexpr(Integer.MAX_VALUE));
 	}
 }
