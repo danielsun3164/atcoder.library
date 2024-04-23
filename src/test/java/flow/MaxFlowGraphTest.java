@@ -135,8 +135,7 @@ class MaxFlowGraphTest {
 
 	// Javaにはuintがないため、、実装しない
 	@Test
-	void boundUint() {
-	}
+	void boundUint() {}
 
 	@Test
 	void selfLoop() {

@@ -63,43 +63,35 @@ class Convolution2Test {
 
 	// 中身はsimpleSModと同じなため、省略
 	@Test
-	void simpleInt() {
-	}
+	void simpleInt() {}
 
 	// Javaにuintがないため、実装しない
 	@Test
-	void simpleUint() {
-	}
+	void simpleUint() {}
 
 	// 中身はsimpleSModと同じなため、省略
 	@Test
-	void simpleLL() {
-	}
+	void simpleLL() {}
 
 	// Javaにullがないため、実装しない
 	@Test
-	void simpleULL() {
-	}
+	void simpleULL() {}
 
 	// Javaにint128の実装がないため、実装しない
 	@Test
-	void simpleInt128() {
-	}
+	void simpleInt128() {}
 
 	// Javaにuint128の実装がないため、実装しない
 	@Test
-	void simpleUInt128() {
-	}
+	void simpleUInt128() {}
 
 	// convolutionLong の実装がないため、実装しない
 	@Test
-	void convLL() {
-	}
+	void convLL() {}
 
 	// convolutionLong の実装がないため、実装しない
 	@Test
-	void convLLBound() {
-	}
+	void convLLBound() {}
 
 	@Test
 	void conv641() {

@@ -318,15 +318,13 @@ class AtcoderMathTest {
 	 * Barrettの実装がないため、テストしない
 	 */
 	@Test
-	void barrett() {
-	}
+	void barrett() {}
 
 	/**
 	 * Barrettの実装がないため、テストしない
 	 */
 	@Test
-	void barrettBorder() {
-	}
+	void barrettBorder() {}
 
 	@Test
 	void isPrime() {
