@@ -1,24 +1,24 @@
 package segtree;
 
 import java.util.Arrays;
+import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * https://github.com/atcoder/ac-library/blob/master/atcoder/segtree.hpp を参考に作成
  */
-abstract class SegTree<S> {
+class SegTree<S> {
 	final int n, size;
 	final S[] d;
-
-	abstract S e();
-
-	abstract S op(S a, S b);
+	final Supplier<S> e;
+	final BinaryOperator<S> op;
 
 	/**
 	 * コンストラクター
 	 */
-	SegTree() {
-		this(0);
+	SegTree(Supplier<S> e, BinaryOperator<S> op) {
+		this(0, e, op);
 	}
 
 	/**
@@ -27,11 +27,13 @@ abstract class SegTree<S> {
 	 * @param n
 	 */
 	@SuppressWarnings({ "unchecked" })
-	SegTree(int n) {
+	SegTree(int n, Supplier<S> e, BinaryOperator<S> op) {
 		this.n = n;
+		this.e = e;
+		this.op = op;
 		size = bitCeil(n);
 		d = (S[]) new Object[size << 1];
-		Arrays.fill(d, e());
+		Arrays.fill(d, e.get());
 		for (int i = size - 1; i >= 1; i--) {
 			update(i);
 		}
@@ -43,11 +45,13 @@ abstract class SegTree<S> {
 	 * @param v
 	 */
 	@SuppressWarnings("unchecked")
-	SegTree(S[] v) {
+	SegTree(S[] v, Supplier<S> e, BinaryOperator<S> op) {
 		n = v.length;
+		this.e = e;
+		this.op = op;
 		size = bitCeil(n);
 		d = (S[]) new Object[size << 1];
-		Arrays.fill(d, e());
+		Arrays.fill(d, e.get());
 		// https://atcoder.jp/contests/practice2/submissions/17594068 に参考
 		// そのまま代入の場合、REが発生する
 		System.arraycopy(v, 0, d, size, n);
@@ -98,21 +102,21 @@ abstract class SegTree<S> {
 		if (!(0 <= l && l <= r && r <= n)) {
 			throw new IllegalArgumentException("l is " + l + ", r is " + r);
 		}
-		S sml = e(), smr = e();
+		S sml = e.get(), smr = e.get();
 		l += size;
 		r += size;
 
 		while (l < r) {
 			if (0 != (l & 1)) {
-				sml = op(sml, d[l++]);
+				sml = op.apply(sml, d[l++]);
 			}
 			if (0 != (r & 1)) {
-				smr = op(d[--r], smr);
+				smr = op.apply(d[--r], smr);
 			}
 			l >>= 1;
 			r >>= 1;
 		}
-		return op(sml, smr);
+		return op.apply(sml, smr);
 	}
 
 	/**
@@ -138,29 +142,30 @@ abstract class SegTree<S> {
 		if (!(0 <= l && l <= n)) {
 			throw new IllegalArgumentException("l is " + l);
 		}
-		if (!f.test(e())) {
-			throw new IllegalArgumentException("f.test(e()) is " + f.test(e()));
+		if (!f.test(e.get())) {
+			throw new IllegalArgumentException("f.test(e()) is " + f.test(e.get()));
 		}
 		if (l == n) {
 			return n;
 		}
 		l += size;
-		S sm = e();
+		S sm = e.get();
 		do {
 			while (0 == (l & 1)) {
 				l >>= 1;
 			}
-			if (!f.test(op(sm, d[l]))) {
+			if (!f.test(op.apply(sm, d[l]))) {
 				while (l < size) {
 					l <<= 1;
-					if (f.test(op(sm, d[l]))) {
-						sm = op(sm, d[l]);
+					S tmp = op.apply(sm, d[l]);
+					if (f.test(tmp)) {
+						sm = tmp;
 						l++;
 					}
 				}
 				return l - size;
 			}
-			sm = op(sm, d[l]);
+			sm = op.apply(sm, d[l]);
 			l++;
 		} while ((l & -l) != l);
 		return n;
@@ -180,36 +185,37 @@ abstract class SegTree<S> {
 		if (!(0 <= r && r <= n)) {
 			throw new IllegalArgumentException("r is " + r);
 		}
-		if (!f.test(e())) {
-			throw new IllegalArgumentException("f.test(e()) is " + f.test(e()));
+		if (!f.test(e.get())) {
+			throw new IllegalArgumentException("f.test(e()) is " + f.test(e.get()));
 		}
 		if (0 == r) {
 			return 0;
 		}
 		r += size;
-		S sm = e();
+		S sm = e.get();
 		do {
 			r--;
 			while (r > 1 && 0 != (r & 1)) {
 				r >>= 1;
 			}
-			if (!f.test(op(d[r], sm))) {
+			if (!f.test(op.apply(d[r], sm))) {
 				while (r < size) {
 					r = (2 * r + 1);
-					if (f.test(op(d[r], sm))) {
-						sm = op(d[r], sm);
+					S tmp = op.apply(d[r], sm);
+					if (f.test(tmp)) {
+						sm = tmp;
 						r--;
 					}
 				}
 				return r + 1 - size;
 			}
-			sm = op(d[r], sm);
+			sm = op.apply(d[r], sm);
 		} while ((r & -r) != r);
 		return 0;
 	}
 
 	private void update(int k) {
-		d[k] = op(d[k << 1], d[k << 1 | 1]);
+		d[k] = op.apply(d[k << 1], d[(k << 1) | 1]);
 	}
 
 	/**
