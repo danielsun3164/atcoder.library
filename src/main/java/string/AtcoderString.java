@@ -97,19 +97,19 @@ public class AtcoderString {
 			ls[i] = (s[i] == s[i + 1]) ? ls[i + 1] : (s[i] < s[i + 1]);
 		}
 		int[] sumL = new int[upper + 1], sumS = new int[upper + 1];
-		IntStream.range(0, n).forEach(i -> {
+		for (int i = 0; i < n; i++) {
 			if (!ls[i]) {
 				sumS[s[i]]++;
 			} else {
 				sumL[s[i] + 1]++;
 			}
-		});
-		IntStream.rangeClosed(0, upper).forEach(i -> {
+		}
+		for (int i = 0; i <= upper; i++) {
 			sumS[i] += sumL[i];
 			if (i < upper) {
 				sumL[i + 1] += sumS[i];
 			}
-		});
+		}
 		int[] lmsMap = new int[n + 1];
 		Arrays.fill(lmsMap, -1);
 		int m = 0;
@@ -152,9 +152,9 @@ public class AtcoderString {
 			}
 			int[] recSa = saIs(recS, recUpper);
 
-			IntStream.range(0, m).forEach(i -> {
+			for (int i = 0; i < m; i++) {
 				sortedLms[i] = lms[recSa[i]];
-			});
+			}
 			induce(n, s, upper, sa, ls, sumL, sumS, sortedLms);
 		}
 		return sa;
@@ -171,12 +171,12 @@ public class AtcoderString {
 		}
 		System.arraycopy(sumL, 0, buf, 0, upper + 1);
 		sa[buf[s[n - 1]]++] = n - 1;
-		IntStream.range(0, n).forEach(i -> {
+		for (int i = 0; i < n; i++) {
 			int v = sa[i];
 			if ((v >= 1) && !ls[v - 1]) {
 				sa[buf[s[v - 1]]++] = v - 1;
 			}
-		});
+		}
 		System.arraycopy(sumL, 0, buf, 0, upper + 1);
 		for (int i = n - 1; i >= 0; i--) {
 			int v = sa[i];
@@ -233,8 +233,7 @@ public class AtcoderString {
 	 * @return 文字列sのSuffix Array
 	 */
 	static int[] suffixArray(String s) {
-		int[] s2 = IntStream.range(0, s.length()).map(i -> s.charAt(i)).toArray();
-		return saIs(s2, 255);
+		return saIs(IntStream.range(0, s.length()).map(i -> s.charAt(i)).toArray(), 255);
 	}
 
 	/**
@@ -250,9 +249,9 @@ public class AtcoderString {
 			throw new IllegalArgumentException("n is " + n);
 		}
 		int[] rnk = new int[n];
-		IntStream.range(0, n).forEach(i -> {
+		for (int i = 0; i < n; i++) {
 			rnk[sa[i]] = i;
-		});
+		}
 		int[] lcp = new int[n - 1];
 		int h = 0;
 		for (int i = 0; i < n; i++) {
@@ -286,9 +285,9 @@ public class AtcoderString {
 			throw new IllegalArgumentException("n is " + n);
 		}
 		int[] rnk = new int[n];
-		IntStream.range(0, n).forEach(i -> {
+		for (int i = 0; i < n; i++) {
 			rnk[sa[i]] = i;
-		});
+		}
 		int[] lcp = new int[n - 1];
 		int h = 0;
 		for (int i = 0; i < n; i++) {
@@ -317,8 +316,7 @@ public class AtcoderString {
 	 * @return 文字列sのLCP Array，i番目の要素は s[sa[i]..n), s[sa[i+1]..n) の LCP(Longest Common Prefix) の長さ。
 	 */
 	static int[] lcpArray(String s, int[] sa) {
-		int[] s2 = IntStream.range(0, s.length()).map(i -> s.charAt(i)).toArray();
-		return lcpArray(s2, sa);
+		return lcpArray(IntStream.range(0, s.length()).map(i -> s.charAt(i)).toArray(), sa);
 	}
 
 	/**
