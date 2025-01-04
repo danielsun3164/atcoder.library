@@ -1,23 +1,23 @@
 package segtree;
 
 import java.util.Arrays;
-import java.util.function.BinaryOperator;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntPredicate;
+import java.util.function.IntSupplier;
 
 /**
  * https://github.com/atcoder/ac-library/blob/master/atcoder/segtree.hpp を参考に作成
  */
-class SegTree<S> {
+class IntSegTree {
 	final int n, size;
-	final S[] d;
-	final BinaryOperator<S> op;
-	final Supplier<S> e;
+	final int[] d;
+	final IntBinaryOperator op;
+	final IntSupplier e;
 
 	/**
 	 * コンストラクター
 	 */
-	SegTree(BinaryOperator<S> op, Supplier<S> e) {
+	IntSegTree(IntBinaryOperator op, IntSupplier e) {
 		this(0, op, e);
 	}
 
@@ -26,14 +26,13 @@ class SegTree<S> {
 	 *
 	 * @param n
 	 */
-	@SuppressWarnings({ "unchecked" })
-	SegTree(int n, BinaryOperator<S> op, Supplier<S> e) {
+	IntSegTree(int n, IntBinaryOperator op, IntSupplier e) {
 		this.n = n;
 		this.op = op;
 		this.e = e;
 		size = bitCeil(n);
-		d = (S[]) new Object[size << 1];
-		Arrays.fill(d, e.get());
+		d = new int[size << 1];
+		Arrays.fill(d, e.getAsInt());
 		for (int i = size - 1; i >= 1; i--) {
 			update(i);
 		}
@@ -44,14 +43,13 @@ class SegTree<S> {
 	 *
 	 * @param v
 	 */
-	@SuppressWarnings("unchecked")
-	SegTree(S[] v, BinaryOperator<S> op, Supplier<S> e) {
+	IntSegTree(int[] v, IntBinaryOperator op, IntSupplier e) {
 		n = v.length;
 		this.e = e;
 		this.op = op;
 		size = bitCeil(n);
-		d = (S[]) new Object[size << 1];
-		Arrays.fill(d, e.get());
+		d = new int[size << 1];
+		Arrays.fill(d, e.getAsInt());
 		// https://atcoder.jp/contests/practice2/submissions/17594068 に参考
 		// そのまま代入の場合、REが発生する
 		System.arraycopy(v, 0, d, size, n);
@@ -66,7 +64,7 @@ class SegTree<S> {
 	 * @param p
 	 * @param x
 	 */
-	void set(int p, S x) {
+	void set(int p, int x) {
 		if (!(0 <= p && p < n)) {
 			throw new IllegalArgumentException("p is " + p);
 		}
@@ -84,7 +82,7 @@ class SegTree<S> {
 	 * @param p
 	 * @return a[p]
 	 */
-	S get(int p) {
+	int get(int p) {
 		if (!(0 <= p && p < n)) {
 			throw new IllegalArgumentException("p is " + p);
 		}
@@ -98,25 +96,25 @@ class SegTree<S> {
 	 * @param r
 	 * @return op(a[l], ..., a[r - 1])、 l==r のときは e()。
 	 */
-	S prod(int l, int r) {
+	int prod(int l, int r) {
 		if (!(0 <= l && l <= r && r <= n)) {
 			throw new IllegalArgumentException("l is " + l + ", r is " + r);
 		}
-		S sml = e.get(), smr = e.get();
+		int sml = e.getAsInt(), smr = e.getAsInt();
 		l += size;
 		r += size;
 
 		while (l < r) {
 			if (0 != (l & 1)) {
-				sml = op.apply(sml, d[l++]);
+				sml = op.applyAsInt(sml, d[l++]);
 			}
 			if (0 != (r & 1)) {
-				smr = op.apply(d[--r], smr);
+				smr = op.applyAsInt(d[--r], smr);
 			}
 			l >>= 1;
 			r >>= 1;
 		}
-		return op.apply(sml, smr);
+		return op.applyAsInt(sml, smr);
 	}
 
 	/**
@@ -124,7 +122,7 @@ class SegTree<S> {
 	 *
 	 * @return op(a[0], ..., a[n - 1])、n==0 のときは e()。
 	 */
-	S allProd() {
+	int allProd() {
 		return d[1];
 	}
 
@@ -138,26 +136,26 @@ class SegTree<S> {
 	 * @param f
 	 * @return 条件を両方満たす r を(いずれか一つ)
 	 */
-	int maxRight(int l, Predicate<S> f) {
+	int maxRight(int l, IntPredicate f) {
 		if (!(0 <= l && l <= n)) {
 			throw new IllegalArgumentException("l is " + l);
 		}
-		if (!f.test(e.get())) {
-			throw new IllegalArgumentException("f.test(e()) is " + f.test(e.get()));
+		if (!f.test(e.getAsInt())) {
+			throw new IllegalArgumentException("f.test(e()) is " + f.test(e.getAsInt()));
 		}
 		if (l == n) {
 			return n;
 		}
 		l += size;
-		S sm = e.get();
+		int sm = e.getAsInt();
 		do {
 			while (0 == (l & 1)) {
 				l >>= 1;
 			}
-			if (!f.test(op.apply(sm, d[l]))) {
+			if (!f.test(op.applyAsInt(sm, d[l]))) {
 				while (l < size) {
 					l <<= 1;
-					S tmp = op.apply(sm, d[l]);
+					int tmp = op.applyAsInt(sm, d[l]);
 					if (f.test(tmp)) {
 						sm = tmp;
 						l++;
@@ -165,7 +163,7 @@ class SegTree<S> {
 				}
 				return l - size;
 			}
-			sm = op.apply(sm, d[l]);
+			sm = op.applyAsInt(sm, d[l]);
 			l++;
 		} while ((l & -l) != l);
 		return n;
@@ -181,27 +179,27 @@ class SegTree<S> {
 	 * @param f
 	 * @return 条件を両方満たす l を(いずれか一つ)
 	 */
-	int minLeft(int r, Predicate<S> f) {
+	int minLeft(int r, IntPredicate f) {
 		if (!(0 <= r && r <= n)) {
 			throw new IllegalArgumentException("r is " + r);
 		}
-		if (!f.test(e.get())) {
-			throw new IllegalArgumentException("f.test(e()) is " + f.test(e.get()));
+		if (!f.test(e.getAsInt())) {
+			throw new IllegalArgumentException("f.test(e()) is " + f.test(e.getAsInt()));
 		}
 		if (0 == r) {
 			return 0;
 		}
 		r += size;
-		S sm = e.get();
+		int sm = e.getAsInt();
 		do {
 			r--;
 			while (r > 1 && 0 != (r & 1)) {
 				r >>= 1;
 			}
-			if (!f.test(op.apply(d[r], sm))) {
+			if (!f.test(op.applyAsInt(d[r], sm))) {
 				while (r < size) {
 					r = (2 * r + 1);
-					S tmp = op.apply(d[r], sm);
+					int tmp = op.applyAsInt(d[r], sm);
 					if (f.test(tmp)) {
 						sm = tmp;
 						r--;
@@ -209,13 +207,13 @@ class SegTree<S> {
 				}
 				return r + 1 - size;
 			}
-			sm = op.apply(d[r], sm);
+			sm = op.applyAsInt(d[r], sm);
 		} while ((r & -r) != r);
 		return 0;
 	}
 
 	private void update(int k) {
-		d[k] = op.apply(d[k << 1], d[(k << 1) | 1]);
+		d[k] = op.applyAsInt(d[k << 1], d[(k << 1) | 1]);
 	}
 
 	/**
