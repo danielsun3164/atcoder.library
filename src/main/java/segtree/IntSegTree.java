@@ -16,6 +16,9 @@ class IntSegTree {
 
 	/**
 	 * コンストラクター
+	 *
+	 * @param op
+	 * @param e
 	 */
 	IntSegTree(IntBinaryOperator op, IntSupplier e) {
 		this(0, op, e);
@@ -25,6 +28,8 @@ class IntSegTree {
 	 * コンストラクター
 	 *
 	 * @param n
+	 * @param op
+	 * @param e
 	 */
 	IntSegTree(int n, IntBinaryOperator op, IntSupplier e) {
 		this.n = n;
@@ -42,6 +47,8 @@ class IntSegTree {
 	 * コンストラクター
 	 *
 	 * @param v
+	 * @param op
+	 * @param e
 	 */
 	IntSegTree(int[] v, IntBinaryOperator op, IntSupplier e) {
 		n = v.length;

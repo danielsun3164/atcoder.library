@@ -16,6 +16,9 @@ class SegTree<S> {
 
 	/**
 	 * コンストラクター
+	 *
+	 * @param op
+	 * @param e
 	 */
 	SegTree(BinaryOperator<S> op, Supplier<S> e) {
 		this(0, op, e);
@@ -25,6 +28,8 @@ class SegTree<S> {
 	 * コンストラクター
 	 *
 	 * @param n
+	 * @param op
+	 * @param e
 	 */
 	@SuppressWarnings({ "unchecked" })
 	SegTree(int n, BinaryOperator<S> op, Supplier<S> e) {
@@ -43,6 +48,8 @@ class SegTree<S> {
 	 * コンストラクター
 	 *
 	 * @param v
+	 * @param op
+	 * @param e
 	 */
 	@SuppressWarnings("unchecked")
 	SegTree(S[] v, BinaryOperator<S> op, Supplier<S> e) {
