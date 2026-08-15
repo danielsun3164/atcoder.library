@@ -115,9 +115,10 @@ class MinCostFlowGraphTest {
 		assertThrows(IllegalArgumentException.class, () -> g.addEdge(0, 0, 0, -1));
 	}
 
+	private static final Random random = new Random();
+
 	@Test
 	void stress() {
-		Random random = new Random();
 		for (int phase = 0; phase < 1000; phase++) {
 			int n = random.nextInt(19) + 2;
 			int m = random.nextInt(100) + 1;

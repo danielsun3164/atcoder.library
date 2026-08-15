@@ -4,67 +4,66 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
-import java.util.function.BinaryOperator;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntPredicate;
+import java.util.function.IntSupplier;
 
 import org.junit.jupiter.api.Test;
 
 /**
  * https://github.com/atcoder/ac-library/blob/master/test/unittest/segtree_test.cpp をもとに作成
  */
-class SegTreeTest {
+class IntSegTreeTest {
 
-	/** テスト用デフォルト値 */
-	private static final String DEFAULT_VALUE = "$";
+	/** 0 */
+	private static final int DEFAULT_VALUE = 0;
 
 	/**
 	 * テスト用クラス
 	 */
-	private abstract static class NaiveSegTree<S> {
+	private abstract static class IntNaiveSegTree {
 		final int n;
-		final S[] d;
-		final BinaryOperator<S> op;
-		final Supplier<S> e;
+		final int[] d;
+		final IntBinaryOperator op;
+		final IntSupplier e;
 
-		@SuppressWarnings("unchecked")
-		NaiveSegTree(int n, BinaryOperator<S> op, Supplier<S> e) {
+		IntNaiveSegTree(int n, IntBinaryOperator op, IntSupplier e) {
 			this.n = n;
 			this.op = op;
 			this.e = e;
-			d = (S[]) new Object[n];
-			Arrays.fill(d, e.get());
+			d = new int[n];
+			Arrays.fill(d, e.getAsInt());
 		}
 
-		void set(int p, S x) {
+		void set(int p, int x) {
 			d[p] = x;
 		}
 
 		@SuppressWarnings("unused")
-		S get(int p) {
+		int get(int p) {
 			return d[p];
 		}
 
-		S prod(int l, int r) {
-			S sum = e.get();
+		int prod(int l, int r) {
+			int sum = e.getAsInt();
 			for (int i = l; i < r; i++) {
-				sum = op.apply(sum, d[i]);
+				sum = op.applyAsInt(sum, d[i]);
 			}
 			return sum;
 		}
 
 		@SuppressWarnings("unused")
-		S allProd() {
+		int allProd() {
 			return prod(0, n);
 		}
 
-		int maxRight(int l, Predicate<S> f) {
-			if (!f.test(e.get())) {
-				throw new IllegalArgumentException("f.test(e()) is " + f.test(e.get()));
+		int maxRight(int l, IntPredicate f) {
+			if (!f.test(e.getAsInt())) {
+				throw new IllegalArgumentException("f.test(e()) is " + f.test(e.getAsInt()));
 			}
-			S sum = e.get();
+			int sum = e.getAsInt();
 			for (int i = l; i < n; i++) {
-				sum = op.apply(sum, d[i]);
+				sum = op.applyAsInt(sum, d[i]);
 				if (!f.test(sum)) {
 					return i;
 				}
@@ -72,13 +71,13 @@ class SegTreeTest {
 			return n;
 		}
 
-		int minLeft(int r, Predicate<S> f) {
-			if (!f.test(e.get())) {
-				throw new IllegalArgumentException("f.test(e()) is " + f.test(e.get()));
+		int minLeft(int r, IntPredicate f) {
+			if (!f.test(e.getAsInt())) {
+				throw new IllegalArgumentException("f.test(e()) is " + f.test(e.getAsInt()));
 			}
-			S sum = e.get();
+			int sum = e.getAsInt();
 			for (int i = r - 1; i >= 0; i--) {
-				sum = op.apply(d[i], sum);
+				sum = op.applyAsInt(d[i], sum);
 				if (!f.test(sum)) {
 					return i + 1;
 				}
@@ -87,22 +86,10 @@ class SegTreeTest {
 		}
 	}
 
-	private static BinaryOperator<String> OP = (a, b) -> {
-		if (!(DEFAULT_VALUE.equals(a) || DEFAULT_VALUE.equals(b) || a.compareTo(b) <= 0)) {
-			throw new IllegalArgumentException("a is " + a + ", b is " + b);
-		}
-		if (DEFAULT_VALUE.equals(a)) {
-			return b;
-		}
-		if (DEFAULT_VALUE.equals(b)) {
-			return a;
-		}
-		return a + b;
-	};
-	private static Supplier<String> E = () -> DEFAULT_VALUE;
+	private static IntBinaryOperator OP = (a, b) -> a + b;
+	private static IntSupplier E = () -> DEFAULT_VALUE;
 
-	private static class Seg extends SegTree<String> {
-
+	private static class Seg extends IntSegTree {
 		Seg() {
 			super(OP, E);
 		}
@@ -112,7 +99,7 @@ class SegTreeTest {
 		}
 	}
 
-	private static class NaiveSeg extends NaiveSegTree<String> {
+	private static class NaiveSeg extends IntNaiveSegTree {
 		NaiveSeg(int n) {
 			super(n, OP, E);
 		}
@@ -156,10 +143,10 @@ class SegTreeTest {
 		assertEquals(DEFAULT_VALUE, s.allProd());
 		assertEquals(DEFAULT_VALUE, s.get(0));
 		assertEquals(DEFAULT_VALUE, s.prod(0, 1));
-		s.set(0, "dummy");
-		assertEquals("dummy", s.get(0));
+		s.set(0, 111);
+		assertEquals(111, s.get(0));
 		assertEquals(DEFAULT_VALUE, s.prod(0, 0));
-		assertEquals("dummy", s.prod(0, 1));
+		assertEquals(111, s.prod(0, 1));
 		assertEquals(DEFAULT_VALUE, s.prod(1, 1));
 	}
 
@@ -169,9 +156,8 @@ class SegTreeTest {
 			NaiveSeg seg0 = new NaiveSeg(n);
 			Seg seg1 = new Seg(n);
 			for (int i = 0; i < n; i++) {
-				String s = "" + (char) ('a' + i);
-				seg0.set(i, s);
-				seg1.set(i, s);
+				seg0.set(i, i);
+				seg1.set(i, i);
 			}
 
 			for (int l = 0; l <= n; l++) {
@@ -182,29 +168,29 @@ class SegTreeTest {
 
 			for (int l = 0; l <= n; l++) {
 				for (int r = l; r <= n; r++) {
-					String y = seg1.prod(l, r);
-					Predicate<String> predicate = new Predicate<>() {
+					int y = seg1.prod(l, r);
+					IntPredicate predicate = new IntPredicate() {
 						@Override
-						public boolean test(String x) {
-							return x.length() <= y.length();
+						public boolean test(int x) {
+							return x <= y;
 						}
 					};
 					assertEquals(seg0.maxRight(l, predicate), seg1.maxRight(l, predicate));
-					assertEquals(seg0.maxRight(l, predicate), seg1.maxRight(l, x -> x.length() <= y.length()));
+					assertEquals(seg0.maxRight(l, predicate), seg1.maxRight(l, x -> x <= y));
 				}
 			}
 
 			for (int r = 0; r <= n; r++) {
 				for (int l = 0; l <= r; l++) {
-					String y = seg1.prod(l, r);
-					Predicate<String> predicate = new Predicate<>() {
+					int y = seg1.prod(l, r);
+					IntPredicate predicate = new IntPredicate() {
 						@Override
-						public boolean test(String x) {
-							return x.length() <= y.length();
+						public boolean test(int x) {
+							return x <= y;
 						}
 					};
 					assertEquals(seg0.minLeft(r, predicate), seg1.minLeft(r, predicate));
-					assertEquals(seg0.minLeft(r, predicate), seg1.minLeft(r, x -> x.length() <= y.length()));
+					assertEquals(seg0.minLeft(r, predicate), seg1.minLeft(r, x -> x <= y));
 				}
 			}
 		}

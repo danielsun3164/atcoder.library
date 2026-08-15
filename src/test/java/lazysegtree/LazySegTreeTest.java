@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
@@ -23,41 +26,22 @@ class LazySegTreeTest {
 	 * テスト用クラス
 	 */
 	private static class ArraySegTree extends LazySegTree<Integer, Integer> {
+		private static final BinaryOperator<Integer> OP = (a, b) -> Math.max(a, b);
+		private static final Supplier<Integer> E = () -> DEFAULT_VALUE;
+		private static final BinaryOperator<Integer> MAPPING = (a, b) -> a + b;
+		private static final BinaryOperator<Integer> COMPOSITION = (a, b) -> a + b;
+		private static final Supplier<Integer> ID = () -> 0;
+
 		public ArraySegTree() {
-			super();
+			super(OP, E, MAPPING, COMPOSITION, ID);
 		}
 
 		public ArraySegTree(int n) {
-			super(n);
+			super(n, OP, E, MAPPING, COMPOSITION, ID);
 		}
 
 		public ArraySegTree(Integer[] v) {
-			super(v);
-		}
-
-		@Override
-		Integer op(Integer a, Integer b) {
-			return Math.max(a, b);
-		}
-
-		@Override
-		Integer e() {
-			return DEFAULT_VALUE;
-		}
-
-		@Override
-		Integer mapping(Integer a, Integer b) {
-			return a + b;
-		}
-
-		@Override
-		Integer composition(Integer a, Integer b) {
-			return a + b;
-		}
-
-		@Override
-		Integer id() {
-			return 0;
+			super(v, OP, E, MAPPING, COMPOSITION, ID);
 		}
 	}
 
@@ -148,7 +132,6 @@ class LazySegTreeTest {
 		int l, r, time;
 
 		S(int l, int r, int time) {
-			super();
 			this.l = l;
 			this.r = r;
 			this.time = time;
@@ -159,19 +142,13 @@ class LazySegTreeTest {
 		int newTime;
 
 		T(int newTime) {
-			super();
 			this.newTime = newTime;
 		}
 	}
 
 	private static class TestSegTree extends LazySegTree<S, T> {
 
-		TestSegTree(int n) {
-			super(n);
-		}
-
-		@Override
-		S op(S l, S r) {
+		private static final BinaryOperator<S> OP = (l, r) -> {
 			if (-1 == l.l) {
 				return r;
 			}
@@ -182,15 +159,9 @@ class LazySegTreeTest {
 				throw new IllegalArgumentException("l.r=" + l.r + ", r.l=" + r.l);
 			}
 			return new S(l.l, r.r, Math.max(l.time, r.time));
-		}
-
-		@Override
-		S e() {
-			return new S(-1, -1, -1);
-		}
-
-		@Override
-		S mapping(T l, S r) {
+		};
+		private static final Supplier<S> E = () -> new S(-1, -1, -1);
+		private static final BiFunction<T, S, S> MAPPING = (l, r) -> {
 			if (-1 == l.newTime) {
 				return r;
 			}
@@ -198,10 +169,8 @@ class LazySegTreeTest {
 				throw new IllegalArgumentException("r.time=" + r.time + ", l.newTime=" + l.newTime);
 			}
 			return new S(r.l, r.r, l.newTime);
-		}
-
-		@Override
-		T composition(T l, T r) {
+		};
+		private static final BinaryOperator<T> COMPOSITION = (l, r) -> {
 			if (-1 == l.newTime) {
 				return r;
 			}
@@ -212,11 +181,11 @@ class LazySegTreeTest {
 				throw new IllegalArgumentException("l.newTime=" + l.newTime + ", r.newTime=" + r.newTime);
 			}
 			return l;
-		}
+		};
+		private static final Supplier<T> ID = () -> new T(-1);
 
-		@Override
-		T id() {
-			return new T(-1);
+		TestSegTree(int n) {
+			super(n, OP, E, MAPPING, COMPOSITION, ID);
 		}
 	}
 

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntSupplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,41 +22,22 @@ class IntLazySegTreeTest {
 	 * テスト用クラス
 	 */
 	private static class ArraySegTree extends IntLazySegTree {
+		private static final IntBinaryOperator OP = (a, b) -> Math.max(a, b);
+		private static final IntSupplier E = () -> DEFAULT_VALUE;
+		private static final IntBinaryOperator MAPPING = (a, b) -> a + b;
+		private static final IntBinaryOperator COMPOSITION = (a, b) -> a + b;
+		private static final IntSupplier ID = () -> 0;
+
 		public ArraySegTree() {
-			super();
+			super(OP, E, MAPPING, COMPOSITION, ID);
 		}
 
 		public ArraySegTree(int n) {
-			super(n);
+			super(n, OP, E, MAPPING, COMPOSITION, ID);
 		}
 
 		public ArraySegTree(int[] v) {
-			super(v);
-		}
-
-		@Override
-		int op(int a, int b) {
-			return Math.max(a, b);
-		}
-
-		@Override
-		int e() {
-			return DEFAULT_VALUE;
-		}
-
-		@Override
-		int mapping(int a, int b) {
-			return a + b;
-		}
-
-		@Override
-		int composition(int a, int b) {
-			return a + b;
-		}
-
-		@Override
-		int id() {
-			return 0;
+			super(v, OP, E, MAPPING, COMPOSITION, ID);
 		}
 	}
 

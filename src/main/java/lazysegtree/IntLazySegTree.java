@@ -1,6 +1,8 @@
 package lazysegtree;
 
 import java.util.Arrays;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -8,47 +10,81 @@ import java.util.function.Predicate;
  *
  * int,int を使用するLazySegTree
  */
-public abstract class IntLazySegTree {
+public class IntLazySegTree {
 
 	final int n, size, log;
 	final int[] d;
 	final int[] lz;
+	final IntBinaryOperator op, mapping, composition;
+	final IntSupplier e, id;
 
-	abstract int op(int a, int b);
+	/**
+	 * コンストラクター
+	 *
+	 * @param op
+	 * @param e
+	 * @param mapping
+	 * @param composition
+	 * @param id
+	 */
+	public IntLazySegTree(IntBinaryOperator op, IntSupplier e, IntBinaryOperator mapping, IntBinaryOperator composition,
+			IntSupplier id) {
+		this(0, op, e, mapping, composition, id);
+	}
 
-	abstract int e();
-
-	abstract int mapping(int f, int s);
-
-	abstract int composition(int a, int b);
-
-	abstract int id();
-
-	public IntLazySegTree(int n) {
+	/**
+	 * コンストラクター
+	 *
+	 * @param n
+	 * @param op
+	 * @param e
+	 * @param mapping
+	 * @param composition
+	 * @param id
+	 */
+	public IntLazySegTree(int n, IntBinaryOperator op, IntSupplier e, IntBinaryOperator mapping,
+			IntBinaryOperator composition, IntSupplier id) {
 		this.n = n;
-		log = ceilPow2(n);
-		size = 1 << log;
+		this.op = op;
+		this.e = e;
+		this.mapping = mapping;
+		this.composition = composition;
+		this.id = id;
+		size = bitCeil(n);
+		log = countrZero(size);
 		d = new int[size << 1];
-		Arrays.fill(d, e());
+		Arrays.fill(d, e.getAsInt());
 		lz = new int[size];
-		Arrays.fill(lz, id());
+		Arrays.fill(lz, id.getAsInt());
 		for (int i = size - 1; i >= 1; i--) {
 			update(i);
 		}
 	}
 
-	public IntLazySegTree() {
-		this(0);
-	}
-
-	public IntLazySegTree(int[] v) {
+	/**
+	 * コンストラクター
+	 *
+	 * @param v
+	 * @param op
+	 * @param e
+	 * @param mapping
+	 * @param composition
+	 * @param id
+	 */
+	public IntLazySegTree(int[] v, IntBinaryOperator op, IntSupplier e, IntBinaryOperator mapping,
+			IntBinaryOperator composition, IntSupplier id) {
 		n = v.length;
-		log = ceilPow2(n);
-		size = 1 << log;
+		this.op = op;
+		this.e = e;
+		this.mapping = mapping;
+		this.composition = composition;
+		this.id = id;
+		size = bitCeil(n);
+		log = countrZero(size);
 		d = new int[size << 1];
-		Arrays.fill(d, e());
+		Arrays.fill(d, e.getAsInt());
 		lz = new int[size];
-		Arrays.fill(lz, id());
+		Arrays.fill(lz, id.getAsInt());
 		System.arraycopy(v, 0, d, size, n);
 		for (int i = size - 1; i >= 1; i--) {
 			update(i);
@@ -98,7 +134,7 @@ public abstract class IntLazySegTree {
 			throw new IllegalArgumentException("l is " + l + ", r is " + r);
 		}
 		if (l == r) {
-			return e();
+			return e.getAsInt();
 		}
 
 		l += size;
@@ -112,18 +148,18 @@ public abstract class IntLazySegTree {
 			}
 		}
 
-		int sml = e(), smr = e();
+		int sml = e.getAsInt(), smr = e.getAsInt();
 		while (l < r) {
 			if ((l & 1) > 0) {
-				sml = op(sml, d[l++]);
+				sml = op.applyAsInt(sml, d[l++]);
 			}
 			if ((r & 1) > 0) {
-				smr = op(d[--r], smr);
+				smr = op.applyAsInt(d[--r], smr);
 			}
 			l >>= 1;
 			r >>= 1;
 		}
-		return op(sml, smr);
+		return op.applyAsInt(sml, smr);
 	}
 
 	/**
@@ -147,7 +183,7 @@ public abstract class IntLazySegTree {
 		}
 		p += size;
 		pushTo(p);
-		d[p] = mapping(f, d[p]);
+		d[p] = mapping.applyAsInt(f, d[p]);
 		updateFrom(p);
 	}
 
@@ -215,31 +251,31 @@ public abstract class IntLazySegTree {
 		if (!(0 <= l && l <= n)) {
 			throw new IllegalArgumentException("l is " + l);
 		}
-		if (!g.test(e())) {
-			throw new IllegalArgumentException("g.test(e()) is " + g.test(e()));
+		if (!g.test(e.getAsInt())) {
+			throw new IllegalArgumentException("g.test(e()) is " + g.test(e.getAsInt()));
 		}
 		if (l == n) {
 			return n;
 		}
 		l += size;
 		pushTo(l);
-		int sm = e();
+		int sm = e.getAsInt();
 		do {
 			while (0 == (l & 1)) {
 				l >>= 1;
 			}
-			if (!g.test(op(sm, d[l]))) {
+			if (!g.test(op.applyAsInt(sm, d[l]))) {
 				while (l < size) {
 					push(l);
 					l = (2 * l);
-					if (g.test(op(sm, d[l]))) {
-						sm = op(sm, d[l]);
+					if (g.test(op.applyAsInt(sm, d[l]))) {
+						sm = op.applyAsInt(sm, d[l]);
 						l++;
 					}
 				}
 				return l - size;
 			}
-			sm = op(sm, d[l]);
+			sm = op.applyAsInt(sm, d[l]);
 			l++;
 		} while ((l & -l) != l);
 		return n;
@@ -259,8 +295,8 @@ public abstract class IntLazySegTree {
 		if (!(0 <= r && r <= n)) {
 			throw new IllegalArgumentException("r is " + r);
 		}
-		if (!g.test(e())) {
-			throw new IllegalArgumentException("g.test(e()) is " + g.test(e()));
+		if (!g.test(e.getAsInt())) {
+			throw new IllegalArgumentException("g.test(e()) is " + g.test(e.getAsInt()));
 		}
 		if (0 == r) {
 			return 0;
@@ -269,43 +305,43 @@ public abstract class IntLazySegTree {
 		for (int i = log; i >= 1; i--) {
 			push((r - 1) >> i);
 		}
-		int sm = e();
+		int sm = e.getAsInt();
 		do {
 			r--;
 			while (r > 1 && (r & 1) > 0) {
 				r >>= 1;
 			}
-			if (!g.test(op(d[r], sm))) {
+			if (!g.test(op.applyAsInt(d[r], sm))) {
 				while (r < size) {
 					push(r);
 					r = (2 * r + 1);
-					if (g.test(op(d[r], sm))) {
-						sm = op(d[r], sm);
+					if (g.test(op.applyAsInt(d[r], sm))) {
+						sm = op.applyAsInt(d[r], sm);
 						r--;
 					}
 				}
 				return r + 1 - size;
 			}
-			sm = op(d[r], sm);
+			sm = op.applyAsInt(d[r], sm);
 		} while ((r & -r) != r);
 		return 0;
 	}
 
 	private void update(int k) {
-		d[k] = op(d[k << 1], d[k << 1 | 1]);
+		d[k] = op.applyAsInt(d[k << 1], d[k << 1 | 1]);
 	}
 
 	private void allApply(int k, int f) {
-		d[k] = mapping(f, d[k]);
+		d[k] = mapping.applyAsInt(f, d[k]);
 		if (k < size) {
-			lz[k] = composition(f, lz[k]);
+			lz[k] = composition.applyAsInt(f, lz[k]);
 		}
 	}
 
 	private void push(int k) {
 		allApply(k << 1, lz[k]);
 		allApply(k << 1 | 1, lz[k]);
-		lz[k] = id();
+		lz[k] = id.getAsInt();
 	}
 
 	private void pushTo(int p) {
@@ -322,18 +358,29 @@ public abstract class IntLazySegTree {
 	}
 
 	/**
+	 * n以上最小の2^xの数字を計算する
 	 *
-	 * @param n `0 <= n`
-	 * @return minimum non-negative `x` s.t. `n <= 2**x`
+	 * @param n
+	 * @return n以上最小の2^xの数字
 	 */
-	private static int ceilPow2(int n) {
+	private static int bitCeil(int n) {
 		if (!(0 <= n)) {
 			throw new IllegalArgumentException("n is " + n);
 		}
-		int x = 0;
-		while ((1 << x) < n) {
-			x++;
+		int x = 1;
+		while (x < n) {
+			x <<= 1;
 		}
 		return x;
+	}
+
+	/**
+	 * 入力数値を2進で表した場合に、右から連続した0のビットを数える
+	 *
+	 * @param n 数値
+	 * @return 2進で表した場合に、右から連続した0のビット
+	 */
+	private static int countrZero(int n) {
+		return Integer.numberOfTrailingZeros(n);
 	}
 }

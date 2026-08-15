@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
  *
  * 本家のライブラリーより実行速度が速いため、念のため残す
  */
-public class Convolution2 {
+class Convolution2 {
 	static int MOD = -1;
 
 	private static int[] convolutionNaive(int[] a, int aFromIndex, int aToIndex, int[] b, int bFromIndex,
@@ -43,7 +43,7 @@ public class Convolution2 {
 	 */
 	private static int[] convolutionFft(int[] a, int aFromIndex, int aToIndex, int[] b, int bFromIndex, int bToIndex) {
 		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
-		int z = 1 << ceilPow2(n + m - 1);
+		int z = bitCeil(n + m - 1);
 
 		double[] aReal = new double[z];
 		double[] aImag = new double[z];
@@ -120,12 +120,12 @@ public class Convolution2 {
 	}
 
 	private static int[] convolution(int[] a, int aFromIndex, int aToIndex, int[] b, int bFromIndex, int bToIndex) {
-		while ((aToIndex > aFromIndex) && (0 == a[aToIndex - 1])) {
-			aToIndex--;
-		}
-		while ((bToIndex > bFromIndex) && (0 == b[bToIndex - 1])) {
-			bToIndex--;
-		}
+//		while ((aToIndex > aFromIndex) && (0 == a[aToIndex - 1])) {
+//			aToIndex--;
+//		}
+//		while ((bToIndex > bFromIndex) && (0 == b[bToIndex - 1])) {
+//			bToIndex--;
+//		}
 		int n = aToIndex - aFromIndex, m = bToIndex - bFromIndex;
 		if ((0 == n) || (0 == m)) {
 			return new int[0];
@@ -219,6 +219,23 @@ public class Convolution2 {
 	}
 
 	/**
+	 * n以上最小の2^xの数字を計算する
+	 *
+	 * @param n
+	 * @return n以上最小の2^xの数字
+	 */
+	static int bitCeil(int n) {
+		if (!(0 <= n)) {
+			throw new IllegalArgumentException("n is " + n);
+		}
+		int x = 1;
+		while (x < n) {
+			x <<= 1;
+		}
+		return x;
+	}
+
+	/**
 	 *
 	 * @param n `0 <= n`
 	 * @return minimum non-negative `x` s.t. `n <= 2**x`
@@ -250,7 +267,7 @@ public class Convolution2 {
 		}
 
 		public static void fft(double[][] p, boolean inv) {
-			int m = Convolution.ceilPow2(p[0].length);
+			int m = ceilPow2(p[0].length);
 			int n = 1 << m;
 			int shift = 32 - Integer.numberOfTrailingZeros(n);
 			for (int i = 1; i < n; i++) {

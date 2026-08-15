@@ -55,10 +55,11 @@ class TwoSatTest {
 		ts = new TwoSat(10);
 	}
 
+	private static final Random random = new Random();
+
 	@Test
 	void stressOk() {
 		for (int phase = 0; phase < 10000; phase++) {
-			Random random = new Random();
 			int n = random.nextInt(20) + 1;
 			int m = random.nextInt(100) + 1;
 			boolean[] expect = new boolean[n];
