@@ -244,12 +244,18 @@ public class AtcoderString {
 	 * @return 配列sのLCP Array，i番目の要素は s[sa[i]..n), s[sa[i+1]..n) の LCP(Longest Common Prefix) の長さ。
 	 */
 	static int[] lcpArray(int[] s, int[] sa) {
+		if (!(s.length == sa.length)) {
+			throw new IllegalArgumentException("s.length=" + s.length + ", sa.length=" + sa.length);
+		}
 		int n = s.length;
 		if (!(n >= 1)) {
 			throw new IllegalArgumentException("n is " + n);
 		}
 		int[] rnk = new int[n];
 		for (int i = 0; i < n; i++) {
+			if (!((sa[i] >= 0) && (sa[i] < n))) {
+				throw new IllegalArgumentException("sa[" + i + "]=" + sa[i]);
+			}
 			rnk[sa[i]] = i;
 		}
 		int[] lcp = new int[n - 1];
